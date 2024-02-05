@@ -2,12 +2,15 @@ package view;
 
 import business.ReservationManager;
 import business.RoomManager;
+import core.Db;
 import core.Helper;
 import entity.Hotel;
 import entity.Reservation;
 import entity.Room;
 
 import javax.swing.*;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -76,27 +79,24 @@ public class ReservationAddView extends Layout {
                 reservation.setTotalPrice(totalPrice(adultNumber, childNumber, days));
 
 
+
                 if (reservationManager.save(reservation)) {
                     Helper.showMsg("done");
+
+                    int stock = room.getStock() -1;
+                    room.setStock(stock);
+                    this.roomManager.updateRoomStock(room);
+                    System.out.println("kayit sonrasi : " + stock);
+
                     dispose();
                 } else {
                     Helper.showMsg("error");
                 }
             }
         });
-
     }
-
-  /*
-   public ReservationAddView(Reservation byId) {
-    super();
-    }
-   */
-
-
     public double totalPrice(int adult, int child, long days){
         double v = ((this.room.getAdultPrice() * adult) + (this.room.getChildPrice() * child)) * days;
         return v;
     }
-
 }

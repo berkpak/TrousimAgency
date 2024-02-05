@@ -1,10 +1,15 @@
 package business;
 
+import core.Db;
 import core.Helper;
 import dao.RoomDao;
 import entity.Hotel;
+import entity.Reservation;
 import entity.Room;
+import entity.User;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
@@ -93,7 +98,12 @@ public class RoomManager {
         return this.roomDao.selectByQuery(query);
     }
 
-
-
+    public boolean updateRoomStock(Room room){
+        if(this.getById(room.getId()) == null){
+            Helper.showMsg("notFound");
+            return false;
+        }
+        return this.roomDao.updateRoomStock(room);
+    }
 
 }

@@ -1,7 +1,9 @@
 package view;
 
 import business.*;
+import core.Db;
 import core.Helper;
+import entity.Reservation;
 import entity.Room;
 import entity.User;
 
@@ -10,6 +12,8 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.text.MaskFormatter;
 import java.awt.event.*;
 import java.io.ObjectStreamException;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -47,6 +51,7 @@ public class EmployeeView extends Layout {
     private JTable tbl_reservation;
     private JScrollPane scrl_book;
     private User user;
+    private Room room;
 
     //Popup menu
     private JPopupMenu hotelPopMenu;
@@ -64,9 +69,6 @@ public class EmployeeView extends Layout {
     private HotelPensionManager hotelPensionManager;
     private HotelSeasonManager hotelSeasonManager;
     private ReservationManager reservationManager;
-
-    private JFormattedTextField fld_strt_date;
-    private JFormattedTextField fld_fnsh_date;
 
 
     //Deneme
@@ -190,23 +192,6 @@ public class EmployeeView extends Layout {
                 }
             });
         });
-        /*
-         public void loadRoomComponent(){
-        this.reservationPopMenu = new JPopupMenu();
-        this.reservationPopMenu.add("Rezervasyon Yap").addActionListener(e -> {
-            int selectedRoomId = this.getTableSelectedRow(this.tbl_room,0);
-            ReservationAddView reservationAddView = new ReservationAddView(
-                    this.roomManager.getById(selectedRoomId)
-            );
-            reservationAddView.addWindowListener(new WindowAdapter() {
-                @Override
-                public void windowClosed(WindowEvent e) {
-                    loadReservationTable();
-                }
-            });
-
-        });
-         */
     }
     public void loadHotelTable() {
         //tablo kolonlari
@@ -222,8 +207,7 @@ public class EmployeeView extends Layout {
             pensionList = this.hotelPensionManager.getForTable(this.col_pension.length, this.hotelPensionManager.findAll());
         }
         createTable(this.tmdl_hotelPension,this.tbl_pension, col_pension, pensionList);
-        //Object[] col_hotelPension = {"ID", "Otel ID", "Pansyion Tipi"};
-       // ArrayList<Object[]> hotelPensionList = this.hotelPensionManager.getForTable(col_hotelPension.length);
+
     }
 
     public void loadHotelSeasonTable(){
@@ -238,6 +222,8 @@ public class EmployeeView extends Layout {
             roomList = this.roomManager.getForTable(col_room.length,this.roomManager.findAll());
         }
         this.createTable(this.tmdl_room,this.tbl_room,col_room,roomList);
+
+
     }
 
     public void loadRoomComponent(){
@@ -263,6 +249,7 @@ public class EmployeeView extends Layout {
                 @Override
                 public void windowClosed(WindowEvent e) {
                     loadReservationTable();
+                    loadRoomTable(null);
                 }
             });
 
@@ -299,13 +286,21 @@ public class EmployeeView extends Layout {
         });
         this.reservationUpdatePopMenu.add("Iptal Et").addActionListener(e ->{
             if(Helper.confirm("sure")){
-                int selectedReservation = this.getTableSelectedRow(tbl_reservation,0);
-                if(this.reservationManager.delete(selectedReservation)){
+                int selectedReservationId = this.getTableSelectedRow(tbl_reservation,0);
+                Reservation reservation = this.reservationManager.getById(selectedReservationId);
+                int selectedRoomId = reservation.getRoomId();
+                Room selectedRoom = this.roomManager.getById(selectedRoomId);
+                if(this.reservationManager.delete(selectedReservationId)){
                     Helper.showMsg("done");
+                    int stock = selectedRoom.getStock() +1;
+                    selectedRoom.setStock(stock);
+                    this.roomManager.updateRoomStock(selectedRoom);
                     loadReservationTable();
+                    loadRoomTable(null);
                 }else{
                     Helper.showMsg("error");
                 }
+
             }
         });
         this.tbl_reservation.setComponentPopupMenu(reservationUpdatePopMenu);
@@ -318,5 +313,4 @@ public class EmployeeView extends Layout {
         this.fld_finish_date = new JFormattedTextField(new MaskFormatter("##/##/####"));
         this.fld_finish_date.setText("06/01/2024");
     }
-    //LocalDate.parse(strt_date.getText(), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
 }

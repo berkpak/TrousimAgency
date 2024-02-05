@@ -60,6 +60,8 @@ public class ReservationManager {
         return this.reservationDao.update(reservation);
     }
 
+
+
     public boolean delete(int id){
         if(this.getById(id) == null){
             Helper.showMsg(id + "Kullanici bulunamadi");
@@ -67,4 +69,5 @@ public class ReservationManager {
         }
         return this.reservationDao.delete(id);
     }
+
 }
