@@ -1,6 +1,7 @@
 package view;
 
 import business.UserManager;
+import core.ComboItem;
 import core.Helper;
 import entity.User;
 
@@ -22,6 +23,7 @@ public class AdminView extends Layout {
     private JButton btn_search_role;
 
     private User user;
+    private Object[] col_user;
 
     //Tablo
     private DefaultTableModel tmdl_user = new DefaultTableModel();
@@ -43,18 +45,17 @@ public class AdminView extends Layout {
         this.lbl_header.setText("Hosgeldiniz : " + this.user.getUsername());
 
         //User
-        loadUserTable();
+        loadUserTable(null);
         loadUserComponent();
         loadUserRoleFilter();
-
-
-
     }
 
-    public void loadUserTable() {
+    public void loadUserTable(ArrayList<Object[]> userList) {
         //Tablo
-        Object[] col_user = {"ID", "Kullanici Adi", "Kullanici Sifresi", "Kullanici Rolu"};
-        ArrayList<Object[]> userList = this.userManager.getForTable(col_user.length);
+        this.col_user = new Object[] {"ID", "Kullanici Adi", "Kullanici Sifresi", "Kullanici Rolu"};
+        if(userList == null){
+        userList = this.userManager.getForTable(col_user.length, this.userManager.findAll());
+        }
         this.createTable(this.tmdl_user, this.tbl_user, col_user, userList);
     }
 
@@ -76,7 +77,7 @@ public class AdminView extends Layout {
             userView.addWindowListener(new WindowAdapter() {
                 @Override
                 public void windowClosed(WindowEvent e) {
-                    loadUserTable();
+                    loadUserTable(null);
                 }
             });
         });
@@ -86,7 +87,7 @@ public class AdminView extends Layout {
             userView.addWindowListener(new WindowAdapter() {
                 @Override
                 public void windowClosed(WindowEvent e) {
-                    loadUserTable();
+                    loadUserTable(null);
                 }
             });
 
@@ -96,30 +97,31 @@ public class AdminView extends Layout {
                 int selectUserId = this.getTableSelectedRow(tbl_user, 0);
                 if (this.userManager.delete(selectUserId)) {
                     Helper.showMsg("done");
-                    loadUserTable();
+                    loadUserTable(null);
                 } else {
                     Helper.showMsg("error");
                 }
             }
         });
         this.tbl_user.setComponentPopupMenu(userPopMenu);
-
-        //Role gore ara butonu
-        this.btn_search_role.addActionListener(e ->{
-
+        this.btn_logout.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                dispose();
+                LoginView loginView = new LoginView();
+            }
         });
-
+        //Role gore ara butonu
+        this.btn_search_role.addActionListener(e -> {
+            User.Role selectedUserRole = (User.Role) cmb_s_user_role.getSelectedItem();
+            ArrayList<User> searchedUserList = userManager.findByRole(selectedUserRole.toString());
+            ArrayList<Object[]> searchedUserRowList = userManager.getForTable(col_user.length,searchedUserList );
+            loadUserTable(searchedUserRowList);
+        });
     }
-
     public void loadUserRoleFilter() {
         this.cmb_s_user_role.setModel(new DefaultComboBoxModel<>(User.Role.values()));
         this.cmb_s_user_role.setSelectedItem(null);
 
     }
-       /* this.cmb_s_user_role.removeAllItems();
-        for (User obj : userManager.findAll()) {
-            this.cmb_s_user_role.addItem(new ComboItem(obj.getId(), obj.getRole()));
-        }
-        this.cmb_s_user_role.setSelectedItem(null);*/
-
 }

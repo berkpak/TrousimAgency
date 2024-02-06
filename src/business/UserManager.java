@@ -25,10 +25,10 @@ public class UserManager {
         return this.userDao.findAll();
     }
 
-    public ArrayList<Object[]> getForTable(int size){
+    public ArrayList<Object[]> getForTable(int size, ArrayList<User> userList){
         ArrayList<Object[]> userRowList = new ArrayList<>();
 
-        for(User user: this.findAll()){
+        for(User user: userList){
             Object[] rowObject = new Object[size];
             int i = 0;
             rowObject[i++] = user.getId();
@@ -39,7 +39,6 @@ public class UserManager {
         }
         return userRowList;
     }
-
     public boolean save(User user){
         if(user.getId() != 0){
             Helper.showMsg("error");
@@ -47,7 +46,6 @@ public class UserManager {
         }
         return this.userDao.save(user);
     }
-
     public User getById(int id){
         return this.userDao.getById(id);
     }
@@ -59,7 +57,6 @@ public class UserManager {
         }
         return this.userDao.update(user);
     }
-
     public boolean delete(int id){
         if(this.getById(id) == null){
             Helper.showMsg(id + "Kullanici bulunamadi");
@@ -67,20 +64,7 @@ public class UserManager {
         }
         return this.userDao.delete(id);
     }
-
-   /* public ArrayList<User> SearchUserTable(User.Role role){
-        String select = "SELECT * FROM public.user";
-
-        ArrayList<String> whereList = new ArrayList<>();
-
-        if(role != null){
-            whereList.add("user_role = '" + role.toString() + "'");
-        }
-        String whereStr = String.join("AND", whereList);
-        String query = select;
-        if (whereStr.length() > 0) {
-            query += " WHERE " + whereStr;
-        }
-        return this.userDao.se */
-
+    public ArrayList<User> findByRole(String userSearchRole){
+        return userDao.findByRole(userSearchRole);
+    }
 }

@@ -92,6 +92,8 @@ public class EmployeeView extends Layout {
         }
         this.lbl_welcome.setText("Hosgeldiniz : " + this.user.getUsername());
 
+
+        loadComponent();
         //Hotel
         loadHotelTable();
         loadHotelComponent();
@@ -110,7 +112,7 @@ public class EmployeeView extends Layout {
         loadReservationTable();
         loadReservationComponent();
 
-        this.tbl_hotel.setComponentPopupMenu(hotelPopMenu);
+
 
 
 
@@ -157,6 +159,17 @@ public class EmployeeView extends Layout {
         });
     }
 
+    public void loadComponent(){
+        this.btn_logout.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                dispose();
+                LoginView loginView = new LoginView();
+            }
+        });
+    }
+
+
     public void loadHotelComponent(){
         //tableRowSelect(this.tbl_hotel);
         //Tiklanan satiri secili hale getiriyor
@@ -192,6 +205,7 @@ public class EmployeeView extends Layout {
                 }
             });
         });
+        this.tbl_hotel.setComponentPopupMenu(hotelPopMenu);
     }
     public void loadHotelTable() {
         //tablo kolonlari

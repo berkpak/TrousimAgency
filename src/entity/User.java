@@ -6,7 +6,6 @@ public class User {
     private String password;
     private String role;
 
-    //ekle popup cmbbox icin
     public enum Role {
         admin,
         employee
@@ -54,7 +53,6 @@ public class User {
     public void setRole(String role) {
         this.role = role;
     }
-
 
     @Override
     public String toString() {

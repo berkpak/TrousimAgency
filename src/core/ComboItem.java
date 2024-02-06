@@ -1,5 +1,7 @@
 package core;
 
+import entity.User;
+
 public class ComboItem {
 
     //Combobox icin key value degeri gosterme

@@ -18,15 +18,18 @@ public class UserDao {
     }
 
     public ArrayList<User> findAll() {
+        return this.selectByQuery("SELECT * FROM public.user ORDER BY user_id ASC");
+    }
+
+    public ArrayList<User> selectByQuery(String query){
         ArrayList<User> userList = new ArrayList<>();
-        String sql = "SELECT * FROM public.user ORDER BY user_id ASC";
-        try {
-            ResultSet rs = this.con.createStatement().executeQuery(sql);
-            while (rs.next()) {
+        try{
+            ResultSet rs = this.con.createStatement().executeQuery(query);
+            while(rs.next()){
                 userList.add(this.match(rs));
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
+        }catch(SQLException throwable){
+            throwable.printStackTrace();
         }
         return userList;
     }
@@ -48,7 +51,6 @@ public class UserDao {
         return obj;
     }
 
-    //
     public User getById(int id){
       User obj = null;
       String query = "SELECT * FROM public.user WHERE user_id = ?";
@@ -66,6 +68,20 @@ public class UserDao {
       return obj;
     }
 
+    public ArrayList<User> findByRole(String userSearchRole) {
+        ArrayList<User> userList = new ArrayList<>();
+        String query = "SELECT * FROM public.user WHERE user_role = " + "'" + userSearchRole + "'";
+        try{
+            ResultSet rs = this.con.createStatement().executeQuery(query);
+            while(rs.next()){
+                userList.add(this.match(rs));
+            }
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+        return userList;
+    }
+
     public User match(ResultSet rs) throws SQLException {
         User obj = new User();
         obj.setId(rs.getInt("user_id"));
@@ -76,7 +92,6 @@ public class UserDao {
         return obj;
     }
 
-    //Ekle popup menu kayit icin
 
     public boolean save(User user) {
         String query = "INSERT INTO public.user " +
