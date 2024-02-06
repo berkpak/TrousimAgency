@@ -2,14 +2,14 @@ package business;
 
 import core.Db;
 import core.Helper;
+import dao.HotelSeasonDao;
 import dao.RoomDao;
-import entity.Hotel;
-import entity.Reservation;
-import entity.Room;
-import entity.User;
+import entity.*;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
@@ -17,9 +17,11 @@ import java.util.Locale;
 public class RoomManager {
 
     private final RoomDao roomDao;
+    private final HotelSeasonDao hotelSeasonDao;
 
     public RoomManager() {
         this.roomDao = new RoomDao();
+        this.hotelSeasonDao = new HotelSeasonDao();
     }
 
     public ArrayList<Object[]> getForTable(int size,ArrayList<Room> rooms){
@@ -64,40 +66,38 @@ public class RoomManager {
         return this.roomDao.save(room);
     }
 
-
-
-    // ornek query
-    //"SELECT * from public.room r\n" +
-    //"LEFT JOIN public.hotel h ON r.hotel_id = h.id\n" +
-    //"WHERE r.stock > 0 AND h.name = 'patika'";
-
-    /*
-    SELECT * from public.room r
-    LEFT JOIN public.hotel h ON r.hotel_id = h.id
-
-    WHERE r.stock > 0
-    AND h.name ILIKE '%k%'
-    AND h.address ILIKE '%l%'
-     */
-
-
     public ArrayList<Room> searchForTable(String hotelName, String hotelAdress, String strt_date, String fnsh_date, String adult , String child){
-        String query = "SELECT * from public.room r LEFT JOIN public.hotel h ON r.hotel_id = h.id ";
+
+        strt_date = LocalDate.parse(strt_date, DateTimeFormatter.ofPattern("dd/MM/yyyy")).toString();
+        fnsh_date = LocalDate.parse(fnsh_date, DateTimeFormatter.ofPattern("dd/MM/yyyy")).toString();
+
+        // Otelleri ve otel sezonlarını içeren sorgu
+        String query = "SELECT * FROM public.room r " +
+                "LEFT JOIN public.hotel h ON r.hotel_id = h.id " +
+                "LEFT JOIN public.hotel_season hs ON h.id = hs.hotel_id ";
+
         ArrayList<String> whereList = new ArrayList<>();
 
-        whereList.add("WHERE r.stock > 0 ");
+        // Odaların stok durumu kontrolü
+        whereList.add("r.stock > 0");
+
+        // Otellerin adı ve adresi filtreleme
         if(hotelName != null){
-            whereList.add(" h.name ILIKE '%" + hotelName + "%' " );
+            whereList.add("h.name ILIKE '%" + hotelName + "%'");
         }
-        if(hotelAdress!= null){
-            whereList.add(" h.address ILIKE '%" + hotelAdress + "%' " );
+        if(hotelAdress != null){
+            whereList.add("h.address ILIKE '%" + hotelAdress + "%'");
         }
-        query += String.join("AND",whereList);
+        // Otellerin sezonlarına göre tarih filtreleme
+        if(strt_date != null && fnsh_date != null){
+            whereList.add("hs.start_date <= '" + strt_date + "' AND hs.finish_date >= '" + fnsh_date + "'");
+        }
+        // WHERE koşullarını birleştirme
+            query += " WHERE " + String.join(" AND ", whereList);
 
-
+        // Sonuçları döndürme
         return this.roomDao.selectByQuery(query);
     }
-
     public boolean updateRoomStock(Room room){
         if(this.getById(room.getId()) == null){
             Helper.showMsg("notFound");

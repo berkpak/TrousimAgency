@@ -2,15 +2,12 @@ package view;
 
 import business.ReservationManager;
 import business.RoomManager;
-import core.Db;
 import core.Helper;
 import entity.Hotel;
 import entity.Reservation;
 import entity.Room;
 
 import javax.swing.*;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -18,7 +15,6 @@ import java.time.temporal.ChronoUnit;
 public class ReservationAddView extends Layout {
     private JPanel container;
     private JLabel lbl_hotel_info;
-    private JTextField fld_guest_count;
     private JTextField fld_guest_name;
     private JTextField fld_guest_id;
     private JTextField fld_mail;
@@ -27,6 +23,7 @@ public class ReservationAddView extends Layout {
 
     private Room room;
     private Hotel hotel;
+    private Reservation reservation;
     private RoomManager roomManager;
     private ReservationManager reservationManager;
 
@@ -43,13 +40,14 @@ public class ReservationAddView extends Layout {
         this.lbl_hotel_info.setText("Otel :" +
                 this.hotel.getName() + " / " +
                 this.hotel.getAdress() + " / " +
-                this.hotel.getStar());
+                this.hotel.getStar()
+        );
 
         //Gun sayisi
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         LocalDate enterDate = LocalDate.parse(startDate, formatter);
         LocalDate exitDate = LocalDate.parse(finishDate, formatter);
-        long days =  ChronoUnit.DAYS.between(enterDate, exitDate);
+        long days = ChronoUnit.DAYS.between(enterDate, exitDate);
 
         int adultNumber = Integer.parseInt(adult.getText());
         int childNumber = Integer.parseInt(child.getText());
@@ -58,7 +56,6 @@ public class ReservationAddView extends Layout {
         //Rezervasyon kayit butonu
         this.btn_save_reservation.addActionListener(e -> {
             JTextField[] checkFieldList = {
-                    this.fld_guest_count,
                     this.fld_guest_name,
                     this.fld_guest_id,
                     this.fld_mail,
@@ -68,7 +65,7 @@ public class ReservationAddView extends Layout {
                 Helper.showMsg("fill");
             } else {
                 Reservation reservation = new Reservation();
-                reservation.setGuestCount(Integer.parseInt(this.fld_guest_count.getText()));
+                reservation.setGuestCount(guestCount(adultNumber, childNumber));
                 reservation.setRoomId(this.room.getId());
                 reservation.setGuestName(this.fld_guest_name.getText());
                 reservation.setGuestCitizenID(this.fld_guest_id.getText());
@@ -79,15 +76,12 @@ public class ReservationAddView extends Layout {
                 reservation.setTotalPrice(totalPrice(adultNumber, childNumber, days));
 
 
-
                 if (reservationManager.save(reservation)) {
                     Helper.showMsg("done");
 
-                    int stock = room.getStock() -1;
+                    int stock = room.getStock() - 1;
                     room.setStock(stock);
                     this.roomManager.updateRoomStock(room);
-                    System.out.println("kayit sonrasi : " + stock);
-
                     dispose();
                 } else {
                     Helper.showMsg("error");
@@ -95,8 +89,13 @@ public class ReservationAddView extends Layout {
             }
         });
     }
-    public double totalPrice(int adult, int child, long days){
+
+    public double totalPrice(int adult, int child, long days) {
         double v = ((this.room.getAdultPrice() * adult) + (this.room.getChildPrice() * child)) * days;
         return v;
+    }
+
+    public int guestCount(int adult, int child) {
+        return adult + child;
     }
 }

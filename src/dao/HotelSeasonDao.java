@@ -18,17 +18,19 @@ public class HotelSeasonDao {
     }
 
     public ArrayList<HotelSeason> findAll() {
-        ArrayList<HotelSeason> hotelSeasonList = new ArrayList<>();
-        String sql = "SELECT * FROM public.hotel_season";
-        try {
-            ResultSet rs = this.con.createStatement().executeQuery(sql);
-            while (rs.next()) {
-                hotelSeasonList.add(this.match(rs));
+        return  this.selectByQuery("SELECT * FROM public.hotel_season");
+    }
+    public ArrayList<HotelSeason> selectByQuery(String query){
+        ArrayList<HotelSeason> hotelSeasons = new ArrayList<>();
+        try{
+            ResultSet rs = this.con.createStatement().executeQuery(query);
+            while(rs.next()){
+                hotelSeasons.add(this.match(rs));
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
+        }catch(SQLException throwable){
+            throwable.printStackTrace();
         }
-        return hotelSeasonList;
+        return hotelSeasons;
     }
 
     public HotelSeason match(ResultSet rs) throws SQLException {

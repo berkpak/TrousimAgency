@@ -157,6 +157,8 @@ public class EmployeeView extends Layout {
             ArrayList<Object[]> searchForRoomFilter = this.roomManager.getForTable(this.col_room.length, roomList);
             loadRoomTable(searchForRoomFilter);
         });
+
+
     }
 
     public void loadComponent(){
@@ -268,6 +270,16 @@ public class EmployeeView extends Layout {
             });
 
         });
+        btn_clear_room.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                fld_hotel.setText(null);
+                fld_adress.setText(null);
+                fld_adult.setText(null);
+                fld_child.setText(null);
+                loadRoomTable(null);
+            }
+        });
         this.tbl_room.setComponentPopupMenu(reservationPopMenu);
     }
 
@@ -319,12 +331,10 @@ public class EmployeeView extends Layout {
         });
         this.tbl_reservation.setComponentPopupMenu(reservationUpdatePopMenu);
     }
-
-
     private void createUIComponents() throws ParseException {
         this.fld_start_date = new JFormattedTextField(new MaskFormatter("##/##/####"));
-        this.fld_start_date.setText("01/01/2024");
+        this.fld_start_date.setText("01/02/2024");
         this.fld_finish_date = new JFormattedTextField(new MaskFormatter("##/##/####"));
-        this.fld_finish_date.setText("06/01/2024");
+        this.fld_finish_date.setText("02/02/2024");
     }
 }
